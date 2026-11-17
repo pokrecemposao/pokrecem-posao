@@ -1,5 +1,6 @@
 ---
 import Logo from "./Logo.astro";
+import Wordmark from "./Wordmark.astro";
 import Icon from "./Icon.astro";
 import { NAV, SITE } from "../config/site.ts";
 
@@ -12,11 +13,7 @@ const { current } = Astro.props;
   <div class="wrap flex h-[68px] items-center gap-4 desk:h-[76px] desk:gap-6">
     <a href="/" class="flex min-w-0 shrink-0 items-center gap-2.5 no-underline desk:gap-3" aria-label="Pokrećem posao, početna">
       <Logo class="h-11 w-auto shrink-0 text-mark desk:h-[50px]" />
-      <!-- Natpis prema LOGO_text.svg: dva retka, POKREĆEM obično, POSAO podebljano, Rhodium Libre -->
-      <span class="flex flex-col font-wordmark text-[19px] leading-[0.9] whitespace-nowrap text-mark desk:text-[22px]" aria-hidden="true">
-        <span class="font-normal">POKREĆEM</span>
-        <span class="font-bold">POSAO</span>
-      </span>
+      <Wordmark class="h-[34px] w-auto shrink-0 text-mark desk:h-10" />
       <span
         class="hidden whitespace-nowrap border-l-[1.5px] border-ink pl-4 text-[12.5px] uppercase tracking-[0.07em] text-muted min-[1360px]:block"
       >
