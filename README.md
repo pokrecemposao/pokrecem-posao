@@ -10,17 +10,17 @@ Specifikacija: `docs/specifikacija.md`.
 
 ## Tehnologije
 
-Astro (statički izlaz), TypeScript, Tailwind CSS 4, fontovi s vlastitog hostinga (Fontsource). Hosting: Cloudflare Pages.
+Astro (statički izlaz), TypeScript, Tailwind CSS 4, fontovi s vlastitog hostinga (Fontsource). Hosting: Cloudflare (Workers, statične datoteke).
 
-## Postavke na Cloudflare Pagesu
+## Objava na Cloudflareu
+
+Projekt se objavljuje kao Cloudflare Worker sa statičnim datotekama (`wrangler.jsonc`). Svaki push na `main` pokreće build i objavu.
 
 | Postavka | Vrijednost |
 |---|---|
-| Framework preset | Astro |
 | Build command | `npm run build` |
-| Build output directory | `dist` |
-| Root directory | prazno |
-| Environment variable | `NODE_VERSION` = `22` (ako build ne prepozna `.nvmrc`) |
+| Deploy command | `npx wrangler deploy` |
+| Privremena adresa | https://pokrecem-posao.pokrecemposao.workers.dev |
 
 ## Naredbe
 
