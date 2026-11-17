@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@fontsource/archivo": "^5.2.5",
-    "@fontsource/archivo-narrow": "^5.2.5",
+    "@fontsource/rhodium-libre": "^5.2.5",
     "@fontsource/source-sans-3": "^5.2.5",
     "@tailwindcss/vite": "^4.1.4",
     "astro": "^5.7.0",

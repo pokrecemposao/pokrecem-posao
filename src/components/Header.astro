@@ -10,17 +10,17 @@ const { current } = Astro.props;
 ---
 <header class="sticky top-0 z-20 border-b border-line bg-cream/95 backdrop-blur">
   <div class="wrap flex h-[68px] items-center gap-4 desk:h-[76px] desk:gap-6">
-    <a href="/" class="flex min-w-0 items-center gap-3 no-underline" aria-label={`${SITE.title}, početna`}>
+    <a href="/" class="flex min-w-0 shrink-0 items-center gap-2.5 no-underline desk:gap-3" aria-label="Pokrećem posao, početna">
       <Logo class="h-11 w-auto shrink-0 text-mark desk:h-[50px]" />
-      <span class="flex min-w-0 flex-col gap-0.5 min-[1360px]:flex-row min-[1360px]:items-center min-[1360px]:gap-4">
-        <span class="font-wordmark whitespace-nowrap text-[25px] font-bold leading-none tracking-[0.005em] desk:text-[29px]">
-          {SITE.title}
-        </span>
-        <span
-          class="whitespace-nowrap text-[11.5px] uppercase tracking-[0.07em] text-muted desk:hidden min-[1360px]:block min-[1360px]:border-l-[1.5px] min-[1360px]:border-ink min-[1360px]:pl-4 min-[1360px]:text-[12.5px]"
-        >
-          {SITE.tagline}
-        </span>
+      <!-- Natpis prema LOGO_text.svg: dva retka, POKREĆEM obično, POSAO podebljano, Rhodium Libre -->
+      <span class="flex flex-col font-wordmark text-[19px] leading-[0.9] whitespace-nowrap text-mark desk:text-[22px]" aria-hidden="true">
+        <span class="font-normal">POKREĆEM</span>
+        <span class="font-bold">POSAO</span>
+      </span>
+      <span
+        class="hidden whitespace-nowrap border-l-[1.5px] border-ink pl-4 text-[12.5px] uppercase tracking-[0.07em] text-muted min-[1360px]:block"
+      >
+        {SITE.tagline}
       </span>
     </a>
 
