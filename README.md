@@ -20,7 +20,8 @@ Projekt se objavljuje kao Cloudflare Worker sa statičnim datotekama (`wrangler.
 |---|---|
 | Build command | `npm run build` |
 | Deploy command | `npx wrangler deploy` |
-| Privremena adresa | https://pokrecem-posao.pokrecemposao.workers.dev |
+| Domena | https://pokrecemposao.com |
+| Rezervna adresa | https://pokrecem-posao.pokrecemposao.workers.dev |
 
 ## Naredbe
 

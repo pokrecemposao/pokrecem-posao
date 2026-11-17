@@ -2,8 +2,8 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
-// Privremena adresa dok se ne spoji vlastita domena.
-const SITE = process.env.SITE_URL ?? "https://pokrecem-posao.pokrecemposao.workers.dev";
+// Glavna adresa stranice (kanonski URL, sitemap, dijeljenje na mrežama).
+const SITE = process.env.SITE_URL ?? "https://pokrecemposao.com";
 
 export default defineConfig({
   site: SITE,
