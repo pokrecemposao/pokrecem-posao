@@ -1,0 +1,22 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  title: string;
+  lead: string;
+  /** Što će ovdje biti kad faza bude gotova. */
+  coming: string;
+}
+const { title, lead, coming } = Astro.props;
+---
+<div class="wrap">
+  <header class="pt-10 pb-2">
+    <h1 class="m-0 text-[clamp(36px,5vw,56px)] font-extrabold leading-[1.04] tracking-[-0.02em]">{title}</h1>
+    <p class="mt-3 max-w-[40em] text-lg text-body">{lead}</p>
+  </header>
+  <div class="card mt-6 flex items-start gap-3 bg-yellow-soft">
+    <Icon name="info" class="mt-0.5 h-5 w-5 shrink-0" />
+    <p class="m-0">{coming}</p>
+  </div>
+  <slot />
+</div>

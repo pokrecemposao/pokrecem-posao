@@ -1,0 +1,32 @@
+---
+import Icon from "./Icon.astro";
+import { NAV } from "../config/site.ts";
+
+interface Props {
+  current: string;
+}
+const { current } = Astro.props;
+---
+<nav
+  class="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-paper px-1 pt-1.5 pb-[max(8px,env(safe-area-inset-bottom))] desk:hidden"
+  aria-label="Navigacija"
+>
+  {
+    NAV.map((item) => {
+      const active = current === item.href;
+      return (
+        <a
+          href={item.href}
+          class:list={[
+            "flex flex-col items-center gap-0.5 py-1 text-[11.5px] no-underline",
+            active ? "font-bold text-ink" : "text-muted",
+          ]}
+          aria-current={active ? "page" : undefined}
+        >
+          <Icon name={item.icon} class="h-6 w-6" />
+          <span class:list={[active && "border-b-[3px] border-yellow"]}>{item.label}</span>
+        </a>
+      );
+    })
+  }
+</nav>

@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/*
+ * Dizajn tokeni (specifikacija §10).
+ * Svaka boja i font u projektu dolazi odavde. Ne dodavati boje izravno u komponente.
+ */
+@theme {
+  --color-cream: #f7f3ea;
+  --color-paper: #fffdf8;
+  --color-line: #e6decd;
+  --color-track: #ece4d3;
+  --color-ink: #22201c;
+  --color-mark: #333333;
+  --color-muted: #686255;
+  --color-body: #3a372f;
+  --color-yellow: #f5c211;
+  --color-yellow-soft: #fbebb0;
+
+  /* Boje kategorija u grafikonima */
+  --color-chart-1: #2b2925;
+  --color-chart-2: #f5c211;
+  --color-chart-3: #c98b3c;
+  --color-chart-4: #b5735c;
+  --color-chart-5: #a39684;
+  --color-chart-6: #7e8c6a;
+
+  --font-wordmark: "Archivo Narrow", "Arial Narrow", Arial, sans-serif;
+  --font-display: "Archivo", "Arial", sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --radius-card: 14px;
+  --breakpoint-desk: 54rem; /* 864px: iznad je gornja navigacija, ispod donja traka */
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-cream text-ink font-body;
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-[1200px] px-5;
+  }
+  .card {
+    @apply rounded-[var(--radius-card)] border border-line bg-paper p-5;
+  }
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-full border-[1.5px] border-transparent px-[22px] py-3 font-bold leading-tight no-underline;
+  }
+  .btn-dark {
+    @apply bg-ink text-cream;
+  }
+  .btn-yellow {
+    @apply bg-yellow text-ink;
+  }
+  .btn-outline {
+    @apply border-ink bg-transparent;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2.5 text-sm font-extrabold uppercase tracking-[0.12em];
+    font-family: var(--font-display);
+  }
+  .eyebrow::before {
+    content: "";
+    @apply h-1.5 w-7 rounded-sm bg-yellow;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+}

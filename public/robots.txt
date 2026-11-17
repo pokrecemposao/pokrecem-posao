@@ -1,0 +1,5 @@
+# Stranica je u izradi. Prije pokretanja zamijeniti s:
+# User-agent: *
+# Allow: /
+User-agent: *
+Disallow: /

@@ -1,0 +1,18 @@
+# build
+dist/
+.astro/
+
+# ovisnosti
+node_modules/
+
+# okruženje i tajne
+.env
+.env.*
+!.env.example
+
+# sustav i uređivači
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+npm-debug.log*
