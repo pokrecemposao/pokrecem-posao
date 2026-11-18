@@ -30,11 +30,11 @@ const view = (() => {
   return { model, today, current };
 })();
 
-const field = "flex flex-col gap-1.5";
+const field = "flex min-w-0 flex-col gap-1.5";
 const label = "text-[15px] font-semibold";
 const input =
   "min-h-12 w-full rounded-xl border-[1.5px] border-line bg-paper px-3.5 py-2.5 text-[17px] focus:border-ink focus:outline-none";
-const tab = "flex-1 rounded-full px-4 py-2.5 text-center font-bold no-underline";
+const tab = "rounded-full border-[1.5px] border-ink px-4 py-3 text-center font-bold no-underline";
 ---
 <BaseLayout title="Brzi unos">
   <div class="wrap max-w-[640px] pt-8 pb-4">
@@ -53,9 +53,9 @@ const tab = "flex-1 rounded-full px-4 py-2.5 text-center font-bold no-underline"
     {
       view && (
         <>
-          <nav class="mt-5 flex gap-2 rounded-full border border-line bg-paper p-1" aria-label="Vrsta unosa">
-            <a href="/unos?obrazac=trosak" class:list={[tab, obrazac === "trosak" ? "bg-ink text-cream" : "text-ink"]} aria-current={obrazac === "trosak" ? "page" : undefined}>Trošak</a>
-            <a href="/unos?obrazac=crta" class:list={[tab, obrazac === "crta" ? "bg-ink text-cream" : "text-ink"]} aria-current={obrazac === "crta" ? "page" : undefined}>Vremenska crta</a>
+          <nav class="mt-5 grid gap-2 desk:grid-cols-2" aria-label="Vrsta unosa">
+            <a href="/unos?obrazac=trosak" class:list={[tab, obrazac === "trosak" ? "bg-ink text-cream" : "bg-paper text-ink"]} aria-current={obrazac === "trosak" ? "page" : undefined}>Trošak</a>
+            <a href="/unos?obrazac=crta" class:list={[tab, obrazac === "crta" ? "bg-ink text-cream" : "bg-paper text-ink"]} aria-current={obrazac === "crta" ? "page" : undefined}>Vremenska crta</a>
           </nav>
 
           {saved && (
