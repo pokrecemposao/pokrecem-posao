@@ -8,27 +8,15 @@
 export const prerender = false;
 
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { buildContent } from "../lib/content-files.ts";
+import { loadModel } from "../lib/bundled-content.ts";
+import { hasRepoAccess, TOKEN_COOKIE } from "../lib/github.ts";
 import { dayNumber, formatDate, formatEur, formatHours, MONTHS_FULL, todayInZagreb } from "../lib/format.ts";
-import { ACTIVITIES, toModel } from "../lib/model.ts";
+import { ACTIVITIES } from "../lib/model.ts";
 import { computeStats, publication } from "../lib/stats.ts";
-
-const REPO = "pokrecemposao/pokrecem-posao";
 
 Astro.response.headers.set("Cache-Control", "private, no-store");
 
-const token = Astro.cookies.get("keystatic-gh-access-token")?.value;
-let authorized = false;
-if (token) {
-  try {
-    const r = await fetch(`https://api.github.com/repos/${REPO}`, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "pokrecem-posao-pregled" },
-    });
-    authorized = r.ok;
-  } catch {
-    authorized = false;
-  }
-}
+const authorized = await hasRepoAccess(Astro.cookies.get(TOKEN_COOKIE)?.value);
 if (!authorized) Astro.response.status = 401;
 
 const CHART: Record<string, string> = {
@@ -42,8 +30,7 @@ const CHART: Record<string, string> = {
 
 const view = (() => {
   if (!authorized) return null;
-  const raw = import.meta.glob("/content/**/*.{yaml,yml,mdoc}", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
-  const model = toModel(buildContent(raw).content);
+  const model = loadModel();
   const today = todayInZagreb();
   const pub = publication(model, today);
   const stats = computeStats(model, today, { includePrivate: true });
@@ -218,7 +205,8 @@ const statusLabel = { done: "završena", in_progress: "u tijeku", planned: "plan
             )}
           </section>
 
-          <p class="mt-6 text-sm text-muted">Pregled se osvježi otprilike minutu nakon svakog spremanja u adminu, kad završi nova objava.</p>
+          <p class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[15px]"><a class="btn btn-yellow" href="/unos">Brzi unos</a><a href="/keystatic" class="self-center">Admin</a></p>
+          <p class="mt-4 text-sm text-muted">Pregled se osvježi otprilike minutu nakon svakog spremanja u adminu, kad završi nova objava.</p>
         </>
       )
     }

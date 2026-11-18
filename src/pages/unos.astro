@@ -1,0 +1,165 @@
+---
+/**
+ * Brzi unos: trošak ili red vremenske crte, u dizajnu stranice i prilagođeno mobitelu.
+ * Samo za prijavljenog urednika (ista GitHub prijava kao u adminu).
+ */
+export const prerender = false;
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { loadModel } from "../lib/bundled-content.ts";
+import { todayInZagreb } from "../lib/format.ts";
+import { hasRepoAccess, TOKEN_COOKIE } from "../lib/github.ts";
+import { ACTIVITIES } from "../lib/model.ts";
+import { computeStats } from "../lib/stats.ts";
+
+Astro.response.headers.set("Cache-Control", "private, no-store");
+
+const authorized = await hasRepoAccess(Astro.cookies.get(TOKEN_COOKIE)?.value);
+if (!authorized) Astro.response.status = 401;
+
+const q = Astro.url.searchParams;
+const obrazac = q.get("obrazac") === "crta" ? "crta" : "trosak";
+const saved = q.get("spremljeno");
+const error = q.get("greska");
+
+const view = (() => {
+  if (!authorized) return null;
+  const model = loadModel();
+  const today = todayInZagreb();
+  const current = computeStats(model, today).current?.slug ?? model.phases[0]?.slug ?? "";
+  return { model, today, current };
+})();
+
+const field = "flex flex-col gap-1.5";
+const label = "text-[15px] font-semibold";
+const input =
+  "min-h-12 w-full rounded-xl border-[1.5px] border-line bg-paper px-3.5 py-2.5 text-[17px] focus:border-ink focus:outline-none";
+const tab = "flex-1 rounded-full px-4 py-2.5 text-center font-bold no-underline";
+---
+<BaseLayout title="Brzi unos">
+  <div class="wrap max-w-[640px] pt-8 pb-4">
+    <h1 class="m-0 text-[clamp(30px,4.5vw,44px)] font-extrabold leading-[1.05] tracking-[-0.02em]">Brzi unos</h1>
+
+    {
+      !view && (
+        <div class="card mt-6">
+          <p class="m-0 text-lg">Ova stranica je samo za tebe. Prijavi se u admin, pa se vrati ovamo.</p>
+          <p class="mt-2 mb-0 text-muted">Ako si već prijavljen, otvori admin jednom da se prijava osvježi.</p>
+          <a class="btn btn-dark mt-5" href="/keystatic">Otvori admin</a>
+        </div>
+      )
+    }
+
+    {
+      view && (
+        <>
+          <nav class="mt-5 flex gap-2 rounded-full border border-line bg-paper p-1" aria-label="Vrsta unosa">
+            <a href="/unos?obrazac=trosak" class:list={[tab, obrazac === "trosak" ? "bg-ink text-cream" : "text-ink"]} aria-current={obrazac === "trosak" ? "page" : undefined}>Trošak</a>
+            <a href="/unos?obrazac=crta" class:list={[tab, obrazac === "crta" ? "bg-ink text-cream" : "text-ink"]} aria-current={obrazac === "crta" ? "page" : undefined}>Vremenska crta</a>
+          </nav>
+
+          {saved && (
+            <div class="card mt-4 border-[#b9d3a6] bg-[#eef6e7]" role="status">
+              <p class="m-0"><b>Spremljeno:</b> {saved}</p>
+              <p class="mt-1 mb-0 text-sm text-muted">Za oko minutu vidi se u adminu i u pregledu.</p>
+            </div>
+          )}
+          {error && (
+            <div class="card mt-4 border-[#e3b3a6] bg-[#fbece7]" role="alert">
+              <p class="m-0"><b>Nije spremljeno.</b> {error}</p>
+            </div>
+          )}
+
+          {obrazac === "trosak" ? (
+            <form method="post" action="/api/unos" class="card mt-4 grid gap-4">
+              <input type="hidden" name="kind" value="trosak" />
+              <div class={field}>
+                <label class={label} for="t-desc">Opis</label>
+                <input class={input} id="t-desc" name="description" required maxlength="120" placeholder="npr. LED rasvjeta, 8 kom" autocomplete="off" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class={field}>
+                  <label class={label} for="t-amount">Iznos (€)</label>
+                  <input class={input} id="t-amount" name="amount" required inputmode="decimal" pattern="\s*\d+([.,]\d{1,2})?\s*" placeholder="22,50" autocomplete="off" />
+                </div>
+                <div class={field}>
+                  <label class={label} for="t-date">Datum</label>
+                  <input class={input} id="t-date" name="date" type="date" required value={view.today} />
+                </div>
+              </div>
+              <div class={field}>
+                <label class={label} for="t-cat">Kategorija</label>
+                <select class={input} id="t-cat" name="category" required>
+                  {view.model.categories.map((c) => <option value={c.slug}>{c.name}</option>)}
+                </select>
+              </div>
+              <div class={field}>
+                <label class={label} for="t-sup">Dobavljač <span class="font-normal text-muted">(neobavezno)</span></label>
+                <input class={input} id="t-sup" name="supplier" maxlength="80" placeholder="npr. Vrtni centar" />
+              </div>
+              <div class={field}>
+                <label class={label} for="t-phase">Faza</label>
+                <select class={input} id="t-phase" name="phase" required>
+                  {view.model.phases.map((p) => <option value={p.slug} selected={p.slug === view.current}>{p.title}</option>)}
+                </select>
+              </div>
+              <label class="flex items-start gap-3 text-[15px]">
+                <input type="checkbox" name="amount_only" class="mt-1 h-5 w-5 accent-[#22201c]" />
+                <span>Na stranici prikaži samo iznos <span class="block text-sm text-muted">Opis i dobavljač ostaju privatni, npr. za ugovore i knjigovodstvo.</span></span>
+              </label>
+              <button class="btn btn-yellow min-h-13 justify-center text-[17px]" type="submit">Spremi trošak</button>
+            </form>
+          ) : (
+            <form method="post" action="/api/unos" class="card mt-4 grid gap-4">
+              <input type="hidden" name="kind" value="crta" />
+              <div class={field}>
+                <label class={label} for="c-title">Što se dogodilo</label>
+                <input class={input} id="c-title" name="title" required maxlength="120" placeholder="npr. Bojanje zidova" autocomplete="off" />
+              </div>
+              <div class={field}>
+                <label class={label} for="c-date">Datum</label>
+                <input class={input} id="c-date" name="date" type="date" required value={view.today} />
+              </div>
+              <div class={field}>
+                <label class={label} for="c-act">Aktivnost</label>
+                <select class={input} id="c-act" name="activity">
+                  <option value="none">— bez radnog vremena (samo događaj)</option>
+                  {Object.entries(ACTIVITIES).map(([k, v]) => <option value={k}>{v}</option>)}
+                </select>
+              </div>
+              <fieldset class="m-0 border-0 p-0">
+                <legend class={`${label} mb-1.5`}>Trajanje <span class="font-normal text-muted">(prazno za događaj)</span></legend>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="flex items-center gap-2">
+                    <input class={input} id="c-h" name="hours" type="number" inputmode="numeric" min="0" max="24" step="1" placeholder="0" aria-label="Sati" />
+                    <span class="text-muted">h</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input class={input} id="c-m" name="minutes" type="number" inputmode="numeric" min="0" max="59" step="1" placeholder="0" aria-label="Minute" />
+                    <span class="text-muted">min</span>
+                  </div>
+                </div>
+              </fieldset>
+              <div class={field}>
+                <label class={label} for="c-phase">Faza</label>
+                <select class={input} id="c-phase" name="phase" required>
+                  {view.model.phases.map((p) => <option value={p.slug} selected={p.slug === view.current}>{p.title}</option>)}
+                </select>
+              </div>
+              <label class="flex items-start gap-3 text-[15px]">
+                <input type="checkbox" name="private" class="mt-1 h-5 w-5 accent-[#22201c]" />
+                <span>Privatno <span class="block text-sm text-muted">Redak se nikad ne prikazuje na stranici, ali sati se vide u tvom pregledu.</span></span>
+              </label>
+              <button class="btn btn-yellow min-h-13 justify-center text-[17px]" type="submit">Spremi</button>
+            </form>
+          )}
+
+          <p class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[15px]">
+            <a href="/pregled">Privatni pregled</a>
+            <a href="/keystatic">Admin</a>
+          </p>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>
