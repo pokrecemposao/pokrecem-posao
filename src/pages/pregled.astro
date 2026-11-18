@@ -1,0 +1,226 @@
+---
+/**
+ * Privatni pregled: sve brojke na današnji dan, uključujući privatne retke
+ * i ono što još nije objavljeno. Vidi ga samo prijavljeni urednik:
+ * provjerava se da GitHub prijava iz admina ima pristup privatnom repozitoriju.
+ * Sadržaj je ugrađen u poslužiteljski dio pri buildu i ne šalje se nikome drugome.
+ */
+export const prerender = false;
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { buildContent } from "../lib/content-files.ts";
+import { dayNumber, formatDate, formatEur, formatHours, MONTHS_FULL, todayInZagreb } from "../lib/format.ts";
+import { ACTIVITIES, toModel } from "../lib/model.ts";
+import { computeStats, publication } from "../lib/stats.ts";
+
+const REPO = "pokrecemposao/pokrecem-posao";
+
+Astro.response.headers.set("Cache-Control", "private, no-store");
+
+const token = Astro.cookies.get("keystatic-gh-access-token")?.value;
+let authorized = false;
+if (token) {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "pokrecem-posao-pregled" },
+    });
+    authorized = r.ok;
+  } catch {
+    authorized = false;
+  }
+}
+if (!authorized) Astro.response.status = 401;
+
+const CHART: Record<string, string> = {
+  "chart-1": "#2b2925",
+  "chart-2": "#f5c211",
+  "chart-3": "#c98b3c",
+  "chart-4": "#b5735c",
+  "chart-5": "#a39684",
+  "chart-6": "#7e8c6a",
+};
+
+const view = (() => {
+  if (!authorized) return null;
+  const raw = import.meta.glob("/content/**/*.{yaml,yml,mdoc}", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+  const model = toModel(buildContent(raw).content);
+  const today = todayInZagreb();
+  const pub = publication(model, today);
+  const stats = computeStats(model, today, { includePrivate: true });
+  const catName = Object.fromEntries(model.categories.map((c) => [c.slug, c.name]));
+  const phaseName = Object.fromEntries(model.phases.map((p) => [p.slug, p.title]));
+  const maxMonth = Math.max(1, ...stats.byMonth.map((m) => m.cents));
+  const maxAct = Math.max(1, ...stats.byActivity.map((a) => a.minutes));
+  return { model, today, pub, stats, catName, phaseName, maxMonth, maxAct };
+})();
+
+const statusLabel = { done: "završena", in_progress: "u tijeku", planned: "planirana" } as const;
+---
+<BaseLayout title="Privatni pregled">
+  <div class="wrap pt-10 pb-4">
+    <h1 class="m-0 text-[clamp(32px,4.5vw,48px)] font-extrabold leading-[1.05] tracking-[-0.02em]">Privatni pregled</h1>
+
+    {
+      !view && (
+        <div class="card mt-6 max-w-[40em]">
+          <p class="m-0 text-lg">Ova stranica je samo za tebe. Prijavi se u admin, pa se vrati ovamo.</p>
+          <p class="mt-2 mb-0 text-muted">Ako si već prijavljen, otvori admin jednom da se prijava osvježi, pa ponovno otvori ovu stranicu.</p>
+          <a class="btn btn-dark mt-5" href="/keystatic">Otvori admin</a>
+        </div>
+      )
+    }
+
+    {
+      view && (
+        <>
+          <p class="mt-3 max-w-[44em] text-lg text-body">
+            Vidiš samo ti. Brojke su stanje na danas ({formatDate(view.today)}), uključujući privatne retke i sve što još nije objavljeno.
+          </p>
+
+          <div class="card mt-5 bg-yellow-soft">
+            {view.pub.cutoff ? (
+              <p class="m-0">
+                <b>Javna stranica</b> prikazuje stanje do <b>Dana {dayNumber(view.pub.cutoff, view.model.startDate)}</b> ({formatDate(view.pub.cutoff)}), prema zadnjoj objavljenoj epizodi.
+              </p>
+            ) : (
+              <p class="m-0">
+                <b>Javno se još ništa ne prikazuje:</b> nijedna epizoda nije objavljena. Brojke ispod vidiš samo ti.
+              </p>
+            )}
+            {view.pub.scheduled.length > 0 && <p class="mt-1 mb-0 text-sm">Zakazano za objavu: {view.pub.scheduled.length}.</p>}
+          </div>
+
+          <section class="mt-6 grid grid-cols-2 gap-3.5 desk:grid-cols-5" aria-label="Brojke">
+            <div class="card"><div class="text-[15px]">Danas je</div><div class="num font-display text-[30px] font-extrabold leading-tight">Dan {view.stats.day}</div></div>
+            <div class="card"><div class="text-[15px]">Ukupno potrošeno</div><div class="num font-display text-[30px] font-extrabold leading-tight">{formatEur(view.stats.totalCents, true)}</div><div class="text-sm text-muted">{view.stats.expenseCount} stavki</div></div>
+            <div class="card"><div class="text-[15px]">Uloženo vrijeme</div><div class="num font-display text-[30px] font-extrabold leading-tight">{formatHours(view.stats.totalMinutes)}</div></div>
+            <div class="card"><div class="text-[15px]">Napredak</div><div class="num font-display text-[30px] font-extrabold leading-tight">{view.stats.progress} %</div><div class="mt-2 h-2.5 overflow-hidden rounded-full bg-track"><div class="h-full rounded-full bg-yellow" style={`width:${view.stats.progress}%`} /></div></div>
+            <div class="card col-span-2 desk:col-span-1"><div class="text-[15px]">Trenutna faza</div><div class="font-display text-[20px] font-extrabold leading-tight">{view.stats.current?.title ?? "—"}</div></div>
+          </section>
+
+          <section class="mt-4 grid gap-3.5 desk:grid-cols-3">
+            <div class="card">
+              <h2 class="m-0 mb-3 text-lg font-extrabold">Troškovi po kategorijama</h2>
+              <ul class="m-0 grid list-none gap-2.5 p-0">
+                {view.stats.byCategory.map((c) => (
+                  <li>
+                    <div class="flex justify-between gap-2 text-[15px]"><span>{c.name}</span><span class="num"><b>{c.pct} %</b> · {formatEur(c.cents, true)}</span></div>
+                    <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-track"><div class="h-full rounded-full" style={`width:${c.pct}%;background:${CHART[c.color] ?? CHART["chart-5"]}`} /></div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="card">
+              <h2 class="m-0 mb-3 text-lg font-extrabold">Troškovi po mjesecima</h2>
+              <ul class="m-0 grid list-none gap-2.5 p-0">
+                {view.stats.byMonth.map((m) => {
+                  const [y, mo] = m.key.split("-").map(Number) as [number, number];
+                  return (
+                    <li>
+                      <div class="flex justify-between gap-2 text-[15px]"><span class="capitalize">{MONTHS_FULL[mo - 1]} {y}.</span><span class="num">{formatEur(m.cents, true)}</span></div>
+                      <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-track"><div class="h-full rounded-full bg-ink" style={`width:${(m.cents / view.maxMonth) * 100}%`} /></div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <div class="card">
+              <h2 class="m-0 mb-3 text-lg font-extrabold">Vrijeme po aktivnostima</h2>
+              <ul class="m-0 grid list-none gap-2.5 p-0">
+                {view.stats.byActivity.map((a) => (
+                  <li>
+                    <div class="flex justify-between gap-2 text-[15px]"><span>{a.label}</span><span class="num">{formatHours(a.minutes)}</span></div>
+                    <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-track"><div class="h-full rounded-full bg-ink" style={`width:${(a.minutes / view.maxAct) * 100}%`} /></div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <section class="card mt-4 overflow-x-auto">
+            <h2 class="m-0 mb-3 text-lg font-extrabold">Faze</h2>
+            <table class="num w-full border-collapse text-[15px]">
+              <thead><tr class="border-b-2 border-ink text-left"><th class="py-2 pr-3">#</th><th class="py-2 pr-3">Faza</th><th class="py-2 pr-3">Status</th><th class="py-2 pr-3">Dana</th><th class="py-2 pr-3 text-right">Troškovi</th><th class="py-2 text-right">Vrijeme</th></tr></thead>
+              <tbody>
+                {view.stats.phases.map((p) => (
+                  <tr class="border-b border-line">
+                    <td class="py-2 pr-3">{p.order}</td>
+                    <td class="py-2 pr-3 font-semibold">{p.title}</td>
+                    <td class="py-2 pr-3">{statusLabel[p.status]}{p.status === "in_progress" && ` · ${p.progress} %`}</td>
+                    <td class="py-2 pr-3">{p.days ?? "—"}</td>
+                    <td class="py-2 pr-3 text-right">{formatEur(p.cents, true)}</td>
+                    <td class="py-2 text-right">{formatHours(p.minutes)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          <section class="card mt-4 overflow-x-auto">
+            <h2 class="m-0 mb-3 text-lg font-extrabold">Svi troškovi</h2>
+            {view.model.expenses.length === 0 ? <p class="m-0 text-muted">Još nema troškova.</p> : (
+              <table class="num w-full border-collapse text-[15px]">
+                <thead><tr class="border-b-2 border-ink text-left"><th class="py-2 pr-3">Datum</th><th class="py-2 pr-3">Opis</th><th class="py-2 pr-3">Kategorija</th><th class="py-2 pr-3">Faza</th><th class="py-2 text-right">Iznos</th></tr></thead>
+                <tbody>
+                  {[...view.model.expenses].reverse().map((e) => (
+                    <tr class="border-b border-line align-top">
+                      <td class="py-2 pr-3 whitespace-nowrap">{formatDate(e.date)}</td>
+                      <td class="py-2 pr-3">
+                        <span class="font-semibold">{e.description}</span>
+                        {e.supplier && <span class="text-muted"> · {e.supplier}</span>}
+                        {e.visibility === "amount_only" && <span class="ml-1 rounded-full bg-track px-2 py-0.5 text-xs">javno samo iznos</span>}
+                      </td>
+                      <td class="py-2 pr-3">{view.catName[e.category] ?? e.category}</td>
+                      <td class="py-2 pr-3">{view.phaseName[e.phase] ?? e.phase}</td>
+                      <td class="py-2 text-right whitespace-nowrap">
+                        {formatEur(e.cents, true)}
+                        {e.original && <div class="text-xs text-muted">{(e.original.cents / 100).toFixed(2).replace(".", ",")} {e.original.currency}</div>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
+
+          <section class="card mt-4 overflow-x-auto">
+            <h2 class="m-0 mb-3 text-lg font-extrabold">Vremenska crta</h2>
+            <table class="num w-full border-collapse text-[15px]">
+              <thead><tr class="border-b-2 border-ink text-left"><th class="py-2 pr-3">Dan</th><th class="py-2 pr-3">Datum</th><th class="py-2 pr-3">Što se dogodilo</th><th class="py-2 pr-3">Aktivnost</th><th class="py-2 text-right">Trajanje</th></tr></thead>
+              <tbody>
+                {[...view.model.timeline].reverse().map((t) => (
+                  <tr class="border-b border-line align-top">
+                    <td class="py-2 pr-3 font-semibold">{dayNumber(t.date, view.model.startDate)}</td>
+                    <td class="py-2 pr-3 whitespace-nowrap">{formatDate(t.date)}</td>
+                    <td class="py-2 pr-3">{t.title}{!t.public && <span class="ml-1 rounded-full bg-track px-2 py-0.5 text-xs">privatno</span>}</td>
+                    <td class="py-2 pr-3">{t.activity ? ACTIVITIES[t.activity] : "—"}</td>
+                    <td class="py-2 text-right">{t.minutes ? formatHours(t.minutes) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          <section class="card mt-4">
+            <h2 class="m-0 mb-3 text-lg font-extrabold">Epizode</h2>
+            {view.model.episodes.length === 0 ? <p class="m-0 text-muted">Još nema epizoda. Prvu dodaj u adminu pod Epizode.</p> : (
+              <ul class="m-0 grid list-none gap-2 p-0">
+                {[...view.model.episodes].sort((a, b) => a.eventStart.localeCompare(b.eventStart)).map((e) => {
+                  const state = e.status === "draft" ? "skica" : e.publishDate > view.today ? `zakazano za ${formatDate(e.publishDate)}` : "objavljeno";
+                  return (
+                    <li class="flex flex-wrap justify-between gap-2 border-b border-line pb-2">
+                      <span><b>{e.number ? `EP ${e.number}` : "UVOD"}</b> · {e.title}</span>
+                      <span class="num text-muted">Dan {dayNumber(e.eventStart, view.model.startDate)}–{dayNumber(e.eventEnd, view.model.startDate)} · {state}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          <p class="mt-6 text-sm text-muted">Pregled se osvježi otprilike minutu nakon svakog spremanja u adminu, kad završi nova objava.</p>
+        </>
+      )
+    }
+  </div>
+</BaseLayout>

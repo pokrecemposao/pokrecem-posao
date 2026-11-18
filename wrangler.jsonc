@@ -16,7 +16,7 @@
     "directory": "./dist",
     // Admin i njegov API uvijek idu u Worker, ne u statične datoteke.
     // Nepostojeće adrese također idu u Worker, koji vraća našu 404 stranicu.
-    "run_worker_first": ["/keystatic", "/keystatic/*", "/api/keystatic/*", "/api/admin-status"]
+    "run_worker_first": ["/keystatic", "/keystatic/*", "/api/keystatic/*", "/api/admin-status", "/pregled", "/pregled/"]
   },
   "observability": {
     "enabled": true

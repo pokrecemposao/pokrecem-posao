@@ -23,6 +23,14 @@ Projekt se objavljuje kao Cloudflare Worker sa statičnim datotekama (`wrangler.
 | Domena | https://pokrecemposao.com |
 | Rezervna adresa | https://pokrecem-posao.pokrecemposao.workers.dev |
 
+## Admin i privatni pregled
+
+| Adresa | Što je |
+|---|---|
+| `/keystatic` | Admin za unos sadržaja (prijava preko GitHuba) |
+| `/pregled` | Privatni pregled svih brojki na današnji dan, samo za prijavljenog urednika |
+| `/api/admin-status` | Provjera postoje li ključevi za admin (samo da/ne) |
+
 ## Naredbe
 
 | Naredba | Što radi |
