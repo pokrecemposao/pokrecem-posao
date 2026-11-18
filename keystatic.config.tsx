@@ -5,6 +5,7 @@
  * Ne dodavati polja bez izmjene specifikacije (§7).
  */
 import { collection, config, fields, singleton } from "@keystatic/core";
+import { BrandMark } from "./src/components/admin/BrandMark";
 
 const AMOUNT = {
   regex: /^\d+(\.\d{1,2})?$/,
@@ -35,7 +36,7 @@ export default config({
     repo: "pokrecemposao/pokrecem-posao",
   },
   ui: {
-    brand: { name: "Pokrećem posao" },
+    brand: { name: "Pokrećem posao", mark: BrandMark },
     navigation: {
       Priča: ["episodes"],
       Evidencija: ["timeline_entries", "expenses"],
