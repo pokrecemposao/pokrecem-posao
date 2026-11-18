@@ -1,6 +1,8 @@
 description: Domena pokrecemposao.com
 date: 2026-11-17
 category: ostalo
-amount_eur: '11'
+amount_eur: '10.18'
+original_amount: '11.17'
+original_currency: USD
 phase: priprema-i-suglasnosti
 visibility: public
