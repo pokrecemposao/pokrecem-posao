@@ -10,9 +10,13 @@ contact_email: pokrecemposao@gmail.com
 social_links:
   - platform: instagram
     handle: '@pokrecemposao'
+    url: https://www.instagram.com/pokrecemposao
   - platform: youtube
     handle: Pokrećem posao
+    url: https://www.youtube.com/@pokrecemposao
   - platform: tiktok
     handle: '@pokrecemposao'
+    url: https://www.tiktok.com/@pokrecemposao
   - platform: facebook
     handle: Pokrećem posao
+    url: https://www.facebook.com/pokrecemposao
