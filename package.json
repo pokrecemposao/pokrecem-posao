@@ -8,21 +8,31 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/validate-content.ts && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "test": "node --test \"src/**/*.test.ts\"",
-    "deploy": "astro build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "validate": "node scripts/validate-content.ts"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.2.0",
+    "@astrojs/react": "^4.2.0",
     "@fontsource/archivo": "^5.2.5",
     "@fontsource/source-sans-3": "^5.2.5",
+    "@keystatic/astro": "^5.0.5",
+    "@keystatic/core": "^0.5.42",
     "@tailwindcss/vite": "^4.1.4",
     "astro": "^5.7.0",
-    "tailwindcss": "^4.1.4"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^4.1.4",
+    "yaml": "^2.6.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "typescript": "^5.8.3",
     "wrangler": "^4.0.0"
   }

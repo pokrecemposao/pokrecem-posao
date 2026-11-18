@@ -5,6 +5,8 @@
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }

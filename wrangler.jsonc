@@ -1,14 +1,20 @@
-// Cloudflare: stranica se objavljuje kao statične datoteke iz dist/.
-// Postojanje ove datoteke sprječava da Cloudflare pri svakoj objavi sam
-// prepravlja projekt (dodaje adapter, poslužiteljski način i sesije).
-// Poslužiteljski dio dodajemo namjerno tek u fazi 1, za Keystatic admin.
+// Cloudflare Worker: javne stranice su statične datoteke iz dist/,
+// a mali poslužiteljski dio (dist/_worker.js) služi samo admin (/keystatic).
+// Ovu datoteku ne brisati: bez nje Cloudflare pri svakoj objavi sam
+// prepravlja projekt.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "pokrecem-posao",
+  "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-11-17",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
+    "binding": "ASSETS",
     "directory": "./dist",
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
+  },
+  "observability": {
+    "enabled": true
   }
 }
