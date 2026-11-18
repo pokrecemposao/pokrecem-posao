@@ -11,8 +11,9 @@
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
-    "not_found_handling": "404-page",
-    "html_handling": "auto-trailing-slash"
+    // Admin i njegov API uvijek idu u Worker, ne u statične datoteke.
+    // Nepostojeće adrese također idu u Worker, koji vraća našu 404 stranicu.
+    "run_worker_first": ["/keystatic", "/keystatic/*", "/api/keystatic/*"]
   },
   "observability": {
     "enabled": true
