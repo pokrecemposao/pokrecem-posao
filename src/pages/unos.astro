@@ -36,7 +36,7 @@ const input =
   "min-h-12 w-full rounded-xl border-[1.5px] border-line bg-paper px-3.5 py-2.5 text-[17px] focus:border-ink focus:outline-none";
 const tab = "rounded-full border-[1.5px] border-ink px-4 py-3 text-center font-bold no-underline";
 ---
-<BaseLayout title="Brzi unos">
+<BaseLayout title="Brzi unos" privateTool>
   <div class="wrap max-w-[640px] pt-8 pb-4">
     <h1 class="m-0 text-[clamp(30px,4.5vw,44px)] font-extrabold leading-[1.05] tracking-[-0.02em]">Brzi unos</h1>
 
@@ -80,7 +80,7 @@ const tab = "rounded-full border-[1.5px] border-ink px-4 py-3 text-center font-b
               <div class="grid grid-cols-2 gap-3">
                 <div class={field}>
                   <label class={label} for="t-amount">Iznos (€)</label>
-                  <input class={input} id="t-amount" name="amount" required inputmode="decimal" pattern="\s*\d+([.,]\d{1,2})?\s*" placeholder="22,50" autocomplete="off" />
+                  <input class={input} id="t-amount" name="amount" required inputmode="decimal" placeholder="22,50" autocomplete="off" />
                 </div>
                 <div class={field}>
                   <label class={label} for="t-date">Datum</label>

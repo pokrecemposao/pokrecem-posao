@@ -16,9 +16,11 @@ interface Props {
   description?: string;
   /** Putanja aktivne stavke navigacije, npr. "/epizode/". */
   nav?: string;
+  /** Privatni alati (/unos, /pregled): bez donje trake, da ne smeta tipkovnici na mobitelu. */
+  privateTool?: boolean;
 }
 
-const { title, description = SITE.description, nav = "" } = Astro.props;
+const { title, description = SITE.description, nav = "", privateTool = false } = Astro.props;
 const fullTitle = title ? `${title} · Pokrećem posao` : "Pokrećem posao · Od 12 m² do vlastitog posla";
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -40,7 +42,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <!-- Dok je stranica u izradi, tražilice je ne indeksiraju. Ukloniti pri pokretanju. -->
     <meta name="robots" content="noindex, nofollow" />
   </head>
-  <body class="min-h-dvh pb-[76px] desk:pb-0">
+  <body class:list={["min-h-dvh desk:pb-0", !privateTool && "pb-[76px]"]}>
     <a href="#sadrzaj" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2 focus:text-cream">
       Preskoči na sadržaj
     </a>
@@ -49,6 +51,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <slot />
     </main>
     <Footer />
-    <TabBar current={nav} />
+    {!privateTool && <TabBar current={nav} />}
   </body>
 </html>
