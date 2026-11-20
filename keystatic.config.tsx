@@ -28,6 +28,7 @@ const CHART_COLORS = [
   { label: "Glina", value: "chart-4" },
   { label: "Sivosmeđa", value: "chart-5" },
   { label: "Kadulja", value: "chart-6" },
+  { label: "Šljiva", value: "chart-7" },
 ] as const;
 
 export default config({
